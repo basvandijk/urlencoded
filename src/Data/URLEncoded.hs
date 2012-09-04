@@ -38,7 +38,7 @@ where
 
 import qualified Prelude
 import Prelude hiding ( null, lookup, filter )
-import Data.List.Split ( unintercalate )
+import Data.List.Split ( splitOn )
 import Control.Monad ( liftM )
 import Control.Arrow ( (>>>) )
 import Control.Monad.Error ( MonadError )
@@ -168,7 +168,7 @@ instance Show URLEncoded where
 -- |Parse this string as x-www-urlencoded
 importString :: MonadError e m => String -> m URLEncoded
 importString "" = return empty
-importString s = liftM importList $ mapM parsePair $ unintercalate "&" s
+importString s = liftM importList $ mapM parsePair $ splitOn "&" s
     where parsePair p =
               case break (== '=') p of
                 (_, []) -> fail $ "Missing value in query string: " ++ show p
@@ -176,7 +176,7 @@ importString s = liftM importList $ mapM parsePair $ unintercalate "&" s
                                      , unesc v
                                      )
                 unknown -> error $ "impossible: " ++ show unknown
-          unesc = unEscapeString . intercalate "%20" . unintercalate "+"
+          unesc = unEscapeString . intercalate "%20" . splitOn "+"
 
 importURI :: MonadError e m => URI -> m URLEncoded
 importURI u = case uriQuery u of
